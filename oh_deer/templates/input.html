@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+    <link rel="canonical" href="https://getbootstrap.com/docs/3.4/examples/starter-template/">
+
+    <title>Starter Template for Bootstrap</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="../static/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="starter-template.css" rel="stylesheet">
+
+  </head>
+
+  <body>
+
+
+    <h1 align="center">Oh, Deer!</h1>
+    <h2 align="center">Where and when are you traveling?</h2>
+    <div class="container">
+      <div class="row">
+        <div class="col">
+          <form action="/output" method="GET">
+            <div align="right" class="form-group">
+              <label for="loc">Origin:</label>
+              <input type="text" id="origin" name='origin' placeholder="Montpelier, VT")>
+            </div>
+            <div align="right" class="form-group">
+              <label for="loc">Destination:</label>
+              <input type="text" id="destination" name='destination' placeholder="Salisbury, VT")>
+            </div>
+          </form>
+        </div>
+        <div class="col">
+          <form action="/output" method="GET">
+            <div align="center" class="form-group">
+              <label for="date">Date:</label>
+              <input type="text" id="date" name='date' placeholder="9-20-19")>
+            </div>
+            <div align="center" class="form-group">
+              <label for="date">Time:</label>
+              <input type="text" id="time" name='time' placeholder="1800")>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          1 of 2
+        </div>
+        <div class="col">
+          2 of 2
+        </div>
+      </div>
+    </div>
+
+    <div align="center" clas = "container">
+	<div clas="starter-template">
+		<h2 align="center">Where and when are you traveling?</h2>
+	</div>
+	<div class = "container">
+		<form action="/output" method="GET">
+			<div class="form-group">
+				<label for="date">Travel Date:</label>
+				<input type="text" id="date" name='date' placeholder="9-20-19")>
+			</div>
+			<div class="form-group">
+				<label for="date">Travel Time:</label>
+				<input type="text" id="time" name='time' placeholder="1800")>
+			</div>
+			<div>
+				<button type="submit" class="btn btn-default btn-lg">How likely am I to see deer?</button>
+			</div>
+		</form>
+	</div>
+
+	<script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+	<script src="../static/js/bootstrap.min.js"></script>
+</div><!-- /.container-->
+
+
+<!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
+    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
+    <script src="../../dist/js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
+<script src="static/js/bootstrap.min.js"></script>
+
+  </body>
+</html>
