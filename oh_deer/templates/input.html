@@ -49,25 +49,25 @@
     </style>
     <h2 >Where and when are you traveling?</h2>
     
-    <form action="/output" method="Get">
+    <form action="{{ url_for('output') }}" method="GET">
         <div class="form-row">
           <div class="form-group col-md-4">
             <label for="Origin">Origin</label>
-            <input type="text" class="form-control" id="origin" value="Montpelier, VT">
+            <input type="text" class="form-control" name="origin" value="Montpelier, VT">
           </div>
           <div class="form-group col-md-4">
             <label for="Destination">Destination</label>
-            <input type="text" class="form-control" id="destination" value="Salisbury, VT">
+            <input type="text" class="form-control" name="destination" value="Salisbury, VT">
           </div>
         </div>
         <div class="form-row">
           <div class="form-group col-md-4">
             <label for="Date">Date</label>
-            <input type="text" class="form-control" id="date" value="9/26/2019">
+            <input type="text" class="form-control" name="date" value="9/26/2019">
           </div>
           <div class="form-group col-md-4">
             <label for="Time">Time</label>
-            <input type="time" class="form-control" id="time" placeholder="Time">
+            <input type="time" class="form-control" name="time" placeholder="Time">
           </div>
         </div>
           <button type="submit" class="btn btn-primary">Submit</button>

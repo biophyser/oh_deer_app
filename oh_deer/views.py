@@ -49,8 +49,8 @@ def index():
 def cesareans_input():
     return render_template("input.html", lat=-72.883145, lon=43.858205)
 
-@app.route('/output')
-def deer_output():
+@app.route('/output', methods=['GET', 'POST'])
+def output():
     # get origin and destination geolocations
     key = 'pk.eyJ1IjoiZGF0YXNsZXV0aCIsImEiOiJjazB0em1tbGUwaXdnM21yenJjdTJybm52In0.qm4lOhweUJZuaxgEl6lEwA'
     geocoder = Geocoder()
@@ -65,24 +65,28 @@ def deer_output():
         startname = 'montpelier, vt'
         endname = 'salisbury, vt'
     
+    print(startname, endname)
+
     startresponse = geocoder.forward(startname)
     endresponse = geocoder.forward(endname)
     origin = startresponse.geojson()['features'][0]
     destination = endresponse.geojson()['features'][0]
     response = directions.directions([origin, destination], 'mapbox/driving') 
-    print(response)   
+    print(response.geojson())   
 
     #pull 'date' from input field and store it
     drive_date = request.args.get('date')
     drive_date = pd.to_datetime(drive_date)
-    print(drive_date)
-    drive_time = int(request.args.get('time'))/100
+    hour, minute = request.args.get('time').split(":")
+    minute = float(minute) / 60
+    hour = float(hour) + minute
+    #drive_time = int(request.args.get('time'))/100
 
     
     idx = test.index.get_loc(drive_date, method='nearest')
     date_prob = test.iloc[idx].values[0]
-    time_prob = deer_time(drive_time)
+    time_prob = deer_time(hour)
     the_result = (date_prob * time_prob * 9 ) + 1
     #the_result = type(time_prob)
 
-    return render_template("output.html", the_result=the_result)
+    return render_template("output.html", the_result=the_result, lat=-72.883145, lon=43.858205)
