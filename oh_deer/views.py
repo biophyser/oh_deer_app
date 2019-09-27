@@ -6,6 +6,7 @@ import pandas as pd
 import psycopg2
 from flask import request
 import numpy as np
+from mapbox import Geocoder, Directions
 
 year_file = open('oh_deer/static/yearly_trend_2010_2022.csv','r')
 test = pd.read_csv(year_file, index_col=0)
@@ -46,10 +47,31 @@ def index():
 @app.route('/')
 @app.route('/input')
 def cesareans_input():
-    return render_template("input.html")
+    return render_template("input.html", lat=-72.883145, lon=43.858205)
 
 @app.route('/output')
 def deer_output():
+    # get origin and destination geolocations
+    key = 'pk.eyJ1IjoiZGF0YXNsZXV0aCIsImEiOiJjazB0em1tbGUwaXdnM21yenJjdTJybm52In0.qm4lOhweUJZuaxgEl6lEwA'
+    geocoder = Geocoder()
+    geocoder.session.params['access_token'] = key
+    directions = Directions()
+    directions.session.params['access_token'] = key
+
+    
+    startname = request.args.get('origin')
+    endname = request.args.get('destination')
+    if startname == '' or endname == '':
+        startname = 'montpelier, vt'
+        endname = 'salisbury, vt'
+    
+    startresponse = geocoder.forward(startname)
+    endresponse = geocoder.forward(endname)
+    origin = startresponse.geojson()['features'][0]
+    destination = endresponse.geojson()['features'][0]
+    response = directions.directions([origin, destination], 'mapbox/driving') 
+    print(response)   
+
     #pull 'date' from input field and store it
     drive_date = request.args.get('date')
     drive_date = pd.to_datetime(drive_date)
