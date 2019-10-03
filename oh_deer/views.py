@@ -1,9 +1,6 @@
 from oh_deer import app
 from flask import render_template
-from sqlalchemy import create_engine
-from sqlalchemy_utils import database_exists, create_database
 import pandas as pd
-import psycopg2
 from flask import request
 import numpy as np
 from mapbox import Geocoder, Directions
@@ -13,7 +10,7 @@ import time
 import geopandas
 import overpass
 from shapely.geometry import LineString, Point
-import config
+from oh_deer import config
 
 
 
