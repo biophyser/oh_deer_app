@@ -13,6 +13,7 @@ import time
 import geopandas
 import overpass
 from shapely.geometry import LineString, Point
+import config
 
 
 
@@ -144,7 +145,7 @@ def cesareans_input():
 @app.route('/output', methods=['GET', 'POST'])
 def output():
     # get origin and destination geolocations
-    key = 'pk.eyJ1IjoiZGF0YXNsZXV0aCIsImEiOiJjazB0em1tbGUwaXdnM21yenJjdTJybm52In0.qm4lOhweUJZuaxgEl6lEwA'
+    key = config.mapbox['key']
     geocoder = Geocoder()
     geocoder.session.params['access_token'] = key
     directions = Directions()
