@@ -17,8 +17,11 @@ from oh_deer import config
 year_file = open('oh_deer/static/yearly_trend_2010_2022.csv','r')
 test = pd.read_csv(year_file, index_col=0)
 test.index = pd.to_datetime(test.index)
-loaded_model = pickle.load(open("oh_deer/static/deer_pred.pickle.dat", "rb"))
+#loaded_model = pickle.load(open("oh_deer/static/deer_pred.pickle.dat", "rb"))
+loaded_model = pickle.load(open("oh_deer/static/pa_deer_pred.pickle.dat", "rb"))
 api_pass = overpass.API(timeout=600)
+
+dummy_df = pd.read_csv('oh_deer/static/dummy_features.csv', index_col=0)
 
 def deer_date(date):
     """
@@ -71,15 +74,16 @@ def split_line(line, max_line_units=5*(0.07381197609536122)):
 
 def colorizer(value):
     # Colors red to blue
-    colors = ['#d90026','#8c0073','#5900a6','#0d00f2']
-    if value >= 0.5:
-        color = 'red'
-    # elif 0.75 >= value > 0.5:
-    #     color = colors[1]
-    # elif 0.5 >= value > 0.25:
-    #     color = colors[2]
+    # http://www.perbang.dk/rgbgradient/
+    colors = ['#6DF7F8','#97A5F9','#C254FA','#ED03FC']
+    if value > 0.65:
+        color = colors[3]
+    elif 0.65 >= value > 0.52:
+        color = colors[2]
+    elif 0.52 >= value > 0.37:
+        color = colors[1]
     else:
-        color = 'blue'
+        color = colors[0]
 
     return color
 
@@ -94,39 +98,45 @@ def process_line_colors(predictions):
     return colors_segments
 
 def overpass_query(line_list):
-    # There is an index column here
-    feature_df_list = [pd.read_csv('oh_deer/static/dummy_features.csv', index_col=0)]
-    cols = feature_df_list[0].columns
+    feature_df_list = list()
     print("LINES:{}".format(len(line_list)))
-    for n, line in enumerate(line_list):
+    for n, line in enumerate(line_list[:]):
         print("LINE:{}".format(n))
-        poly = line.buffer(.0025, cap_style=3)
+        poly = line.buffer(.001, cap_style=3)
         simplified = poly.simplify(0.001, preserve_topology=False)
-        
+
         # Building overpass queries
-        road_query = 'nwr(around:1, {c[0]}, {c[1]});(._;>;);out;'.format(
-            c=line.interpolate(0.5, normalized = True).coords[:][0])
-        area_query = 'nwr(poly:"{}");out;'.format(
-            ' '.join('{c[0]} {c[1]}'.format(c=c) for c in simplified.exterior.coords[:]))
+        midpoint = line.interpolate(0.5, normalized = True).coords[:][0]
         
+        buffer = 5e-3
+        road_query = 'nwr[highway]({}, {}, {}, {});(._;>;);out;'.format(midpoint[1]-buffer, midpoint[0]-buffer, midpoint[1]+buffer, midpoint[0]+buffer)
+        area_query = 'nwr(poly:"{}");out;'.format(
+            ' '.join('{c[1]} {c[0]}'.format(c=c) for c in simplified.exterior.coords[:]))
+
         # Getting overpass road responses
         road_response = api_pass.get(road_query)
         road_geodf = geopandas.GeoDataFrame.from_features(road_response)
         culled_road = road_geodf.dropna(axis='index', how='all', subset=road_geodf.columns[1:])
+        print(culled_road.shape)
         # Overwriting feature_dict each time
-        feature_dict = make_feature_dict_road(culled_road, ['highway', 'surface'], prefix='road_')
-        time.sleep(4)
-        
+        feature_dict = make_feature_dict(culled_road, ['highway', 'surface'], prefix='road_')
+        #feature_dict = make_feature_dict_road(culled_road, ['highway', 'surface'], prefix='road_')
+        time.sleep(2)
+
         # Getting overpass area responses
         response = api_pass.get(area_query)
         geodf = geopandas.GeoDataFrame.from_features(response)
         culled_geodf = geodf.dropna(axis='index', how='all', subset=geodf.columns[1:])
-        feature_dict.update(make_feature_dict_area(culled_geodf, cols, prefix=None))
+        print(culled_geodf.shape)
+        feature_dict.update(make_feature_dict(culled_geodf, cols, prefix='area_'))
+        #feature_dict.update(make_feature_dict_area(culled_geodf, cols, prefix=None))
         feature_df_list.append(pd.io.json.json_normalize(feature_dict))
         time.sleep(2)
-    feature_df = pd.concat(feature_df_list, sort=True)
-    feature_df.reset_index(inplace=True)
+    feature_df = pd.concat(feature_df_list, ignore_index=True, sort=False)
+    print(feature_df.shape)
+    feature_df = pd.concat([dummy_df, feature_df], sort=False)[dummy_df.columns].iloc[1:,:]
     return feature_df
+
 
 @app.route('/index')
 def index():
@@ -152,8 +162,8 @@ def output():
     startname = request.args.get('origin')
     endname = request.args.get('destination')
     if startname == '' or endname == '':
-        startname = 'montpelier, vt'
-        endname = 'salisbury, vt'
+        startname = 'Punxsutawney, PA'
+        endname = 'State College, PA'
     
     startresponse = geocoder.forward(startname)
     endresponse = geocoder.forward(endname)
@@ -169,11 +179,11 @@ def output():
     line_list = split_line(shapely_line)
     # Get features from overpass
     feature_df = overpass_query(line_list)
-    feature_df = feature_df.reindex(sorted(feature_df.columns), axis=1)
+    #feature_df = feature_df.reindex(sorted(feature_df.columns), axis=1)
     feature_df.to_csv('debugging.csv')
     # Make prediction
-    #predictions = make_predictions(feature_df.values)
-    predictions = [.2, .7, .8, .2]
+    predictions = loaded_model.predict(feature_df)
+    #predictions = [.2, .7, .8, .2]
     print(predictions)
     # Make pretty colors
     #colorstring = process_line_colors(predictions)
@@ -240,6 +250,68 @@ def make_feature_dict_road(df, features, prefix=None):
         #else:
             #feature_dict[prefix+feature] = None
     return feature_dict
+
+
+cols = [
+    'aeroway',
+    'amenity',
+    'barrier',
+    'boundary',
+    'building',
+    'healthcare',
+    'highway',
+    'landuse',
+    'leisure',
+    'man_made',
+    'natural',
+    'parking',
+    'power',
+    'railway',
+    'route',
+    'service',
+    'surface',
+    'tourism',
+    'waterway'
+]
+
+def make_feature_dict(df, features, prefix=None):
+    """
+    
+    Parameters
+    ----------
+    df : geopandas.geodataframe.GeoDataFrame
+        Dataframe containing features pulled from overpass API
+        
+    features : list
+        List of column names associated with high-level feature names
+        employed by overpass/OSM. Reference here:
+        https://wiki.openstreetmap.org/wiki/Map_Features
+        
+    prefix : str
+        Additional identifier placed before feature name.
+        
+    Returns
+    -------
+    dict
+        Nested dictionary of features with value counts as eventual values.
+        
+    """
+    
+    if prefix!=None:
+        pass
+    else:
+        prefix=''
+        
+    feature_dict = {}
+    for feature in features:
+        if feature in df.columns:
+            series = df[feature].value_counts()
+            feature_dict[prefix+feature] = { k:v for (k,v) in zip(series.index, series.values)}
+        else:
+            feature_dict[prefix+feature] = None
+    return feature_dict
+
+
 
 def make_feature_dict_area(df, features, prefix=None):
     """
