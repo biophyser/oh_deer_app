@@ -121,7 +121,7 @@ def overpass_query(line_list):
         # Overwriting feature_dict each time
         feature_dict = make_feature_dict(culled_road, ['highway', 'surface'], prefix='road_')
         #feature_dict = make_feature_dict_road(culled_road, ['highway', 'surface'], prefix='road_')
-        time.sleep(2)
+        time.sleep(5)
 
         # Getting overpass area responses
         response = api_pass.get(area_query)
@@ -131,7 +131,7 @@ def overpass_query(line_list):
         feature_dict.update(make_feature_dict(culled_geodf, cols, prefix='area_'))
         #feature_dict.update(make_feature_dict_area(culled_geodf, cols, prefix=None))
         feature_df_list.append(pd.io.json.json_normalize(feature_dict))
-        time.sleep(2)
+        time.sleep(5)
     feature_df = pd.concat(feature_df_list, ignore_index=True, sort=False)
     print(feature_df.shape)
     feature_df = pd.concat([dummy_df, feature_df], sort=False)[dummy_df.columns].iloc[1:,:]
@@ -147,7 +147,7 @@ def index():
 @app.route('/')
 @app.route('/input')
 def cesareans_input():
-    return render_template("input.html", lat=-72.883145, lon=43.858205)
+    return render_template("input.html", lon=-95.281123, lat=38.762650)
 
 @app.route('/output', methods=['GET', 'POST'])
 def output():
@@ -173,6 +173,7 @@ def output():
 
     coords = response.geojson()['features'][0]['geometry']['coordinates']
     shapely_line = LineString(coords)
+    midpoint = shapely_line.interpolate(0.5, normalized=True).coords[:][0]
     line = '['+','.join(["[{},{}]".format(lat, lon) for lat, lon in coords])+']'
 
     # Splitting shapely_line
@@ -211,7 +212,7 @@ def output():
 
     #print(color)
 
-    return render_template("output.html", line=line, lat=-72.883145, lon=43.858205, colors_segments=colors_segments)
+    return render_template("output.html", line=line, lat=midpoint[0], lon=midpoint[1], colors_segments=colors_segments)
 
 
 def make_feature_dict_road(df, features, prefix=None):

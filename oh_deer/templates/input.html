@@ -85,8 +85,8 @@
     var map = new mapboxgl.Map({
       container: 'map',
       style: 'mapbox://styles/mapbox/light-v10',
-      center: [{{lat}}, {{lon}}],
-      zoom: 6
+      center: [{{lon}}, {{lat}}],
+      zoom: 3
     });
     map.on('load', function() {
       var geojsonData = {
@@ -95,24 +95,10 @@
           "type": "Feature",
           "geometry": {
             "type": "Point",
-            "coordinates": [{{lat}}, {{lon}}]
+            "coordinates": [{{lon}}, {{lat}}]
           }
         }]
       };
-      map.addLayer({
-        "id": "points",
-        "type": "circle",
-        "source": {
-          "type": "geojson",
-          "data": geojsonData
-        },
-        "paint": {
-            "circle-radius": 5,
-            "circle-color": "#ECCB2F",
-            "circle-stroke-width": 1,
-            "circle-stroke-color": "black"
-        }
-      })
     });
 
 </script>
