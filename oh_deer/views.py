@@ -121,7 +121,7 @@ def overpass_query(line_list):
         # Overwriting feature_dict each time
         feature_dict = make_feature_dict(culled_road, ['highway', 'surface'], prefix='road_')
         #feature_dict = make_feature_dict_road(culled_road, ['highway', 'surface'], prefix='road_')
-        time.sleep(5)
+        time.sleep(10)
 
         # Getting overpass area responses
         response = api_pass.get(area_query)
@@ -131,7 +131,7 @@ def overpass_query(line_list):
         feature_dict.update(make_feature_dict(culled_geodf, cols, prefix='area_'))
         #feature_dict.update(make_feature_dict_area(culled_geodf, cols, prefix=None))
         feature_df_list.append(pd.io.json.json_normalize(feature_dict))
-        time.sleep(5)
+        time.sleep(10)
     feature_df = pd.concat(feature_df_list, ignore_index=True, sort=False)
     print(feature_df.shape)
     feature_df = pd.concat([dummy_df, feature_df], sort=False)[dummy_df.columns].iloc[1:,:]
