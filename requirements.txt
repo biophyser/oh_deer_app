@@ -83,7 +83,7 @@ nbconvert==5.5.0
 nbformat==4.4.0
 notebook==6.0.1
 numba==0.45.1
-numpy==1.16.4
+numpy==1.22.0
 nvector==0.7.4
 overpass==0.6.1
 -e git+https://github.com/DinoTools/python-overpy.git@8aa4bafc8e9b336d4f8da7c993ca545494a0e5a9#egg=overpy
