@@ -10,7 +10,7 @@ boto3==1.9.231
 botocore==1.12.231
 CacheControl==0.12.5
 calmjs.parse==1.2.0
-certifi==2019.6.16
+certifi==2022.12.7
 cffi==1.12.3
 chardet==3.0.4
 chroma-py==0.1.0.dev1
